@@ -30,6 +30,10 @@ class Patient:
         self.labs = []
         self.lab_total = 0
 
+
+    def set_age(self, new_age):
+        self.__age = new_age
+
     def get_age(self):
         return self.__age
 
@@ -37,7 +41,16 @@ class Patient:
         return f"{self.patient_id}, {self.first_name}, {self.last_name}, {self.__age}, {self.address}, {self.admit_date}, {self.billing_items}, {self.line_item_costs}, {self.labs}, {self.lab_total}, {self.medications}, {self.total_bill}"
 
 def new_patient():
-    patient_id = input("Patient ID: ")
+    while True:
+        patient_id = input("Patient ID (or Q to quit): ").strip()
+        if patient_id.lower() == "q":
+            print()
+            return
+        if patient_id in patient_dict:
+            print("Duplicate Patient ID, please enter another ID.")
+            continue
+        else:
+            break
     first_name = input("First Name: ")
     last_name = input("Last Name: ")
     age = input("Age: ")
@@ -58,34 +71,38 @@ def change_patient_info():
                     print("Exiting Patient Search")
                     break
         if patient_needing_updated_info in patient_dict:
-            info_needing_update = int(input(f""" 
+            info_needing_update = input(f""" 
     What info needs to be updated:
     1. First Name
     2. Last Name
     3. Age
     4. Address
     5. Admit Date
-    """))
+    """)
     
-            if info_needing_update == 1:
+            if info_needing_update.strip() == "1":
                 new_first_name = input("Enter new First Name: ")
                 patient_dict[patient_needing_updated_info].first_name = new_first_name
-            elif info_needing_update == 2:
+                print(f"Patient info updated")
+            elif info_needing_update.strip() == "2":
                 new_last_name = input("Enter new Last Name: ")
                 patient_dict[patient_needing_updated_info].last_name = new_last_name
-            elif info_needing_update == 3:
+                print(f"Patient info updated")
+            elif info_needing_update.strip() == "3":
                 new_age = input("Enter new Age: ")
-                patient_dict[patient_needing_updated_info].__age = new_age  
-            elif info_needing_update == 4:
+                patient_dict[patient_needing_updated_info].set_age(new_age)
+                print(f"Patient info updated")
+            elif info_needing_update.strip() == "4":
                 new_address = input("Enter new Address: ")
                 patient_dict[patient_needing_updated_info].address = new_address
-            elif info_needing_update == 5:
+                print(f"Patient info updated")
+            elif info_needing_update.strip() == "5":
                 new_admit_date = input("Enter new Admit Date: ")
                 patient_dict[patient_needing_updated_info].admit_date = new_admit_date
+                print(f"Patient info updated")
             else:
                 print("Invalid choice")
             
-            print(f"Patient info updated")
             
             with open("patients.txt", "w") as file:
                 for i in patient_dict.values():
@@ -155,8 +172,10 @@ class Doctor:
                     print(f"Login successful. Welcome Dr. {doctor_dict[user_id].last_name}")
                     doctor_dict[user_id].doctor_menu()
                     return
+                else:
+                    print("User ID or Password Incorrect. Try again")
             else:
-                print("User ID or Password Incorrect. Try again")
+                print("Invalid user ID. Try again.")
 
     #Main menu of doctor functions. Tasks 4 and 5 call functions from other modules.
     def doctor_menu(self):
