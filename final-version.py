@@ -80,6 +80,7 @@ def new_patient():
         file.write(Patient.to_string(patient_dict[patient_id]) + "\n")
     
     print(f"Patient {first_name} {last_name} has been stored in the file.")
+    print()
 
 def change_patient_info():
     while True:
@@ -88,14 +89,7 @@ def change_patient_info():
                     print("Exiting Patient Search")
                     break
         if patient_needing_updated_info in patient_dict:
-            info_needing_update = input(f""" 
-    What info needs to be updated:
-    1. First Name
-    2. Last Name
-    3. Age
-    4. Address
-    5. Admit Date
-    """)
+            info_needing_update = input(f""" What info needs to be updated:\n1. First Name\n2. Last Name\n3. Age\n4. Address\n5. Admit Date\n""")
     
             if info_needing_update.strip() == "1":
                 new_first_name = input("Enter new First Name: ")
@@ -339,7 +333,9 @@ class Doctor:
                 frequency = input("Frequency: ")
                 med = {"Medication": medication_name, "Dosage": dosage, "Route": route, "Frequency": frequency}
                 patient.medications.append(med)
-                
+                med_line_item = f"medication: {medication_name.lower()}"
+                patient.line_item_costs[med_line_item] = 50
+                patient.total_bill += 50
                 #Add to persistent storage
                 with open("patients.txt", "w") as file:
                     for i in patient_dict.values():
@@ -694,7 +690,6 @@ def load_default_users():
 #Main Menu
 def open_main_menu():
     while True:
-        load_default_users()
         print("Welcome to the Hospital Interface System")
         print()
         print("Sign In As: \n")
@@ -716,4 +711,6 @@ def open_main_menu():
                 print()
             break
 
+load_default_users()
 open_main_menu()
+
