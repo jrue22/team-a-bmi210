@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import datetime
 
 patient_dict= {}
 nurse_dict = {}
@@ -51,14 +52,30 @@ def new_patient():
             continue
         else:
             break
-    first_name = input("First Name: ")
-    last_name = input("Last Name: ")
-    age = input("Age: ")
-    address = input("Address: ")
-    admit_date = input("Admit Date: ")
+    first_name = input("First Name: ").strip()
+    last_name = input("Last Name: ").strip()
+    while True:
+        age_input = input("Age: ").strip()
+        try:
+            age = int(age_input)
+            if age < 0 or age > 130:
+                print("Please enter a valid age.")
+                continue
+            break
+        except ValueError:
+            print("Please enter a valid number for age.")
+    address = input("Address: ").strip()
+    while True:
+        admit_date = input("Admit Date (MM/DD/YYYY): ").strip()
+        try:
+            datetime.strptime(admit_date, "%m/%d/%Y")
+            break
+        except ValueError:
+            print("Invalid date format. Use MM/DD/YYYY.")
     billing_items = input("Billing Items as a Comma-Seperated List: ").lower().strip().split(",")
     patient_dict[patient_id] = Patient(patient_id, first_name, last_name, age, address, admit_date, billing_items)
 
+    print(f"Patient account '{patient_id}' created successfully.")
     with open("patients.txt", "a") as file:
         file.write(Patient.to_string(patient_dict[patient_id]) + "\n")
     
@@ -245,7 +262,7 @@ class Doctor:
         while True:
             print("\n--- Patient Details ---")
             patient_details_input = input("Enter Patient ID or Q to quit: ")
-            if patient_details_input == 'Q' or patient_details_input == 'q':
+            if patient_details_input.strip().lower() == "q":
                 print("Exiting Patient Search")
                 break
             try:
@@ -274,18 +291,25 @@ class Doctor:
     
     #Adds labs and lab_total for cost as new instance variables, and adds their costs to the total bill.
     def order_labs(self):
-        print("\n--- Order Labs ---")
         while True:
-            pt_id = input("Enter Patient ID or Q to quit: ")
-            if pt_id == 'Q' or pt_id == 'q':
+            print("\n--- Order Labs ---")
+            pt_id = input("Enter Patient ID or Q to quit: ").strip()
+            if pt_id.lower() == "q":
                 print("Exiting Patient Search")
                 break
+            if pt_id not in patient_dict:
+                print("Patient ID not found. Please try again.")
+                continue
             if pt_id in patient_dict:
                 patient = patient_dict[pt_id]
+            while True:
                 print("\n--- Lab Menu ---")
                 for lab, cost in lab_catalog.items():
                     print(f'{lab}: ${cost}')
-                lab_select = input("Select Lab: ")
+                lab_select = input("Select Lab or Q to quit: ")
+                if lab_select.strip().lower() == "q":
+                    print("Closing lab ordering interface.")
+                    break
                 if lab_select in lab_catalog:
                     patient.labs.append(lab_select)
                     patient.lab_total += lab_catalog[lab_select]
@@ -293,14 +317,12 @@ class Doctor:
                     print(f"{lab_select} ordered for patient {pt_id}.")
                     print(f"New total lab cost: ${patient.lab_total}")
                 else:
-                    print("Invalid lab selection.")
+                    print("Invalid lab selection. Please try again.")
                 #Add to persistent storage
                 with open("patients.txt", "w") as file:
                     for i in patient_dict.values():
                         file.write(i.to_string() + "\n")
-            else:
-                print("Patient ID not found.")
-            break
+
     #Adds a diction of all medication information to the patient instance medication list.
     def prescribe_medication(self):
         print("\n--- Prescribe Medication ---")
@@ -448,7 +470,7 @@ def make_new_nurse():
     last_name = input("Last Name: ")
     floor = input("Floor Number: ")
     nurse_dict[user_id] = Nurse(user_id, password, first_name, last_name, floor)   
-
+    print(f"Nurse account '{user_id}' created successfully.")
 # Lab Tech Module
 
 
@@ -582,6 +604,7 @@ def make_new_tech():
     first_name = input("First Name: ")
     last_name = input("Last Name: ")
     labtech_dict[user_id] = LabTechnician(user_id, password, first_name, last_name)
+    print(f"Lab technician account '{user_id}' created successfully.")
 
 #Exit Module
 #Closes out the full program. 
