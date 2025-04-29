@@ -117,8 +117,7 @@ def display_info_for_patient_view():
         if id_input.lower() == 'q':
                 print("Exiting Patient Search")
                 print()
-                return
-                
+                return      
         try:
             active_user = patient_dict[id_input]
         except KeyError:
@@ -225,8 +224,14 @@ class Doctor:
                 print("Invalid input, please try again.")
     #Adds to the doctor dict.                
     def create_doctor(self):
-        print("\n--- Create New Account ---")
-        user_id = input("New User ID: ")
+        while True:
+            print("\n--- Create New Account ---")
+            user_id = input("New User ID: ")
+            if user_id in doctor_dict:
+                print("Duplicate Doctor ID, please enter another ID.")
+                continue
+            else:
+                break
         password = input("Password: ")
         first_name = input("First name: ")
         last_name = input("Last name: ")
@@ -301,7 +306,7 @@ class Doctor:
         print("\n--- Prescribe Medication ---")
         while True:
             pt_id = input("Enter Patient ID or Q to quit: ")
-            if pt_id == 'Q' or pt_id == 'q':
+            if pt_id.strip().lower() == "q":
                 print("Exiting Patient Search")
                 break
             if pt_id in patient_dict:
@@ -431,7 +436,13 @@ class Nurse:
 #Function for doctors, adds a new nurse instance to the dictionary.
 def make_new_nurse():
     print("Please enter Nurse Profile information")
-    user_id = input("User ID: ")
+    while True:
+        user_id = input("User ID: ")
+        if user_id in nurse_dict:
+            print("Duplicate Nurse ID, please enter another ID.")
+            continue
+        else:
+            break
     password = input("Password: ")
     first_name = input("First Name: ")
     last_name = input("Last Name: ")
@@ -479,7 +490,7 @@ class LabTechnician:
             print("\n--- Lab Technician Menu ---")
             print("1. View Assigned Lab Tests")
             print("2. Edit Lab Test Info")
-            print("3. Return to Main Menu")
+            print("3. Logout")
             selected_choice = input("Select an option: ")
 
             if selected_choice == "1":
@@ -496,7 +507,9 @@ class LabTechnician:
     def view_assigned_labs(self):
         # views labs for the specific patient by their ID.
         try:
-            pid = input("Enter Patient ID: ")
+            pid = input("Enter Patient ID or Q to quit: ")
+            if pid.strip().lower() == "q":
+                return
             if pid in patient_dict:
                 patient = patient_dict[pid]
                 print(f"\nPatient: {patient.first_name} {patient.last_name}")
@@ -520,7 +533,9 @@ class LabTechnician:
 
     def edit_lab_test(self):
         try:
-            pid = input("Enter Patient ID to edit lab info: ")
+            pid = input("Enter Patient ID to edit or Q to quit: ")
+            if pid.strip().lower() == "q":
+                return
             if pid in patient_dict:
                 patient = patient_dict[pid]
                 print(f"\nCurrent Lab Info for {patient.first_name} {patient.last_name}:")
@@ -556,7 +571,13 @@ class LabTechnician:
 #Function to make a new lab tech
 def make_new_tech():
     print("Please enter Lab Technician Profile information")
-    user_id = input("User ID: ")
+    while True:
+        user_id = input("User ID: ")
+        if user_id in labtech_dict:
+            print("Duplicate Lab Tech ID, please enter another ID.")
+            continue
+        else:
+            break
     password = input("Password: ")
     first_name = input("First Name: ")
     last_name = input("Last Name: ")
@@ -591,12 +612,18 @@ def discharge_patient():
     print(f"Patient ID: {patient_id}")
     print(f"Name: {patient.first_name} {patient.last_name}")
     for key, value in patient.line_item_costs.items():
-        print(f"   {key.title()} - ${value}")
+        print(f"  {key.title()} - ${value}")
     if patient.labs:
         for item in patient.labs:
             print("   Lab Tests")
             print(f"      {item}")
             print(f"   Lab Total - ${patient.lab_total}")
+    if patient.medications:
+        for item in patient.medications:
+            print("  Medications")
+            print(f"    Medication: {item["Medication"]}")
+            print(f"    Dosage: {item["Dosage"]}")
+
     print(f"Total Bill: ${patient.total_bill}")
     print("--------------------------")
 
@@ -611,6 +638,11 @@ def discharge_patient():
             print("Lab Tests:\n")
             for item in patient.labs:
                 file.write(f"      {item}\n")
+        if patient.medications:
+            print("Medications:\n")
+            for item in patient.medications:
+                file.write(f"    Medication: {item["Medication"]}\n")
+                file.write(f"    Dosage: {item["Dosage"]}\n")
         file.write(f"   Lab Total - ${patient.lab_total}\n")
         file.write(f"Total Bill: ${patient.total_bill}\n")
     
@@ -630,10 +662,10 @@ def discharge_patient():
 
 def load_default_users():
     doctor_dict["chief"] = Doctor("chief","1234","Default","Default","Admin","0")
-    patient_dict["0001"] = Patient("0001", "Stefan", "Nguyen", "12", "Hell Ave", "04/20/2025", ["catheter", "rectal implant"])
+    patient_dict["0001"] = Patient("0001", "Stefan", "Nguyen", "12", "Hell Ave", "04/20/2025", ["catheter", "room"])
     nurse_dict["nurse1"] = Nurse('nurse1', 'password', 'Sasha', 'Patschke', 1)
-    doctor_dict["doctor1"] = Doctor("doctor1", "Password1", "Drew", "Gordon", "Family Medicine", "5127814115")
-    labtech_dict["tech1"] = LabTechnician("tech1", "passtech1", "Ari", "Rez")
+    doctor_dict["doctor1"] = Doctor("doctor1", "password", "Drew", "Gordon", "Family Medicine", "5127814115")
+    labtech_dict["tech1"] = LabTechnician("tech1", "password", "Ari", "Rez")
 
     
 #Main Menu
